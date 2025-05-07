@@ -10,13 +10,13 @@ import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCEK4irWtP1f6y_J1Gj3kNwsyLdItndt5Y",
-  authDomain: "sdkk-22bbc.firebaseapp.com",
-  projectId: "sdkk-22bbc",
-  storageBucket: "sdkk-22bbc.firebasestorage.app",
-  messagingSenderId: "1039314059862",
-  appId: "1:1039314059862:web:e14e764f77ce86c817b1f7",
-  measurementId: "G-K0L3MMPDR7"
+  apiKey: "AIzaSyDLCDJR1nhyxXeJ4_W2-SHjBvBmBBS_1U0",
+  authDomain: "dggdsd-ac173.firebaseapp.com",
+  projectId: "dggdsd-ac173",
+  storageBucket: "dggdsd-ac173.firebasestorage.app",
+  messagingSenderId: "436657489509",
+  appId: "1:436657489509:web:4f2621806c2865c019688c",
+  measurementId: "G-H78F108XPE"
 
 };
 
