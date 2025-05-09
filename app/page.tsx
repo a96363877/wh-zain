@@ -15,7 +15,7 @@ export default function ZainPayment() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [loading, setIsLoading] = useState(true)
   const [showAmountDropdown, setShowAmountDropdown] = useState(false)
-  const [selectedAmount, setSelectedAmount] = useState("29.900")
+  const [selectedAmount, setSelectedAmount] = useState("30.000")
   const [otherAmount, setOtherAmount] = useState("0")
   const [fees, setFees] = useState("-0.600")
   const [total, setTotal] = useState("0.000")
