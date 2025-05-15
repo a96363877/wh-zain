@@ -3,7 +3,18 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
-import { CreditCard, Wallet, Check, Shield, Download, ChevronRight, AlertCircle, Info, Lock } from "lucide-react"
+import {
+  CreditCard,
+  Wallet,
+  Check,
+  Shield,
+  Download,
+  ChevronRight,
+  AlertCircle,
+  Info,
+  Lock,
+  LanguagesIcon,
+} from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -40,6 +51,7 @@ export default function PaymentMethods() {
   const [resendDisabled, setResendDisabled] = useState(false)
   const [countdown, setCountdown] = useState(30)
   const router = useRouter()
+  const [isArabic, setIsArabic] = useState(true)
 
   // Form validation
   const [cardNumber, setCardNumber] = useState("")
@@ -66,10 +78,27 @@ export default function PaymentMethods() {
           total: storedAmount,
         }))
       }
+
+      // Check if language preference is stored
+      const storedLanguage = localStorage.getItem("language")
+      if (storedLanguage) {
+        setIsArabic(storedLanguage === "ar")
+      }
     } catch (error) {
       console.error("Error accessing localStorage:", error)
     }
   }, [])
+
+  // Toggle language function
+  const toggleLanguage = () => {
+    const newLanguage = !isArabic
+    setIsArabic(newLanguage)
+    try {
+      localStorage.setItem("language", newLanguage ? "ar" : "en")
+    } catch (error) {
+      console.error("Error saving to localStorage:", error)
+    }
+  }
 
   // Get visitor ID from localStorage (if available)
   const getVisitorId = () => {
@@ -117,21 +146,21 @@ export default function PaymentMethods() {
     const errors: Record<string, string> = {}
 
     if (!cardNumber) {
-      errors.cardNumber = "يرجى إدخال رقم البطاقة"
+      errors.cardNumber = isArabic ? "يرجى إدخال رقم البطاقة" : "Please enter card number"
     } else if (cardNumber.replace(/\s+/g, "").length < 16) {
-      errors.cardNumber = "رقم البطاقة غير صحيح"
+      errors.cardNumber = isArabic ? "رقم البطاقة غير صحيح" : "Invalid card number"
     }
 
     if (!cardExpiry) {
-      errors.cardExpiry = "يرجى إدخال تاريخ الانتهاء"
+      errors.cardExpiry = isArabic ? "يرجى إدخال تاريخ الانتهاء" : "Please enter expiry date"
     } else if (cardExpiry.length < 5) {
-      errors.cardExpiry = "تاريخ الانتهاء غير صحيح"
+      errors.cardExpiry = isArabic ? "تاريخ الانتهاء غير صحيح" : "Invalid expiry date"
     }
 
     if (!cardCvc) {
-      errors.cardCvc = "يرجى إدخال رمز الأمان"
+      errors.cardCvc = isArabic ? "يرجى إدخال رمز الأمان" : "Please enter security code"
     } else if (cardCvc.length < 3) {
-      errors.cardCvc = "رمز الأمان غير صحيح"
+      errors.cardCvc = isArabic ? "رمز الأمان غير صحيح" : "Invalid security code"
     }
 
     setFormErrors(errors)
@@ -198,7 +227,7 @@ export default function PaymentMethods() {
     const otpCode = otpValues.join("")
 
     if (otpCode.length !== 6) {
-      setOtpError("يرجى إدخال رمز التحقق المكون من 6 أرقام")
+      setOtpError(isArabic ? "يرجى إدخال رمز التحقق المكون من 6 أرقام" : "Please enter the 6-digit verification code")
       return
     }
 
@@ -244,7 +273,7 @@ export default function PaymentMethods() {
     return () => clearTimeout(timer)
   }, [resendDisabled, countdown])
 
-  // Get current date in Arabic format
+  // Get current date in Arabic or English format
   const getCurrentDate = () => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
@@ -253,7 +282,148 @@ export default function PaymentMethods() {
       hour: "2-digit",
       minute: "2-digit",
     }
-    return new Date().toLocaleDateString("ar-SA", options)
+    return new Date().toLocaleDateString(isArabic ? "ar-SA" : "en-US", options)
+  }
+
+  // Translations object
+  const translations = {
+    completePayment: {
+      ar: "إتمام الدفع",
+      en: "Complete Payment",
+    },
+    secure: {
+      ar: "آمن",
+      en: "Secure",
+    },
+    choosePaymentMethod: {
+      ar: "اختر طريقة الدفع المفضلة لديك أدناه",
+      en: "Choose your preferred payment method below",
+    },
+    payment: {
+      ar: "الدفع",
+      en: "Payment",
+    },
+    verification: {
+      ar: "التحقق",
+      en: "Verification",
+    },
+    confirmation: {
+      ar: "التأكيد",
+      en: "Confirmation",
+    },
+    orderNumber: {
+      ar: "رقم الطلب:",
+      en: "Order Number:",
+    },
+    totalAmount: {
+      ar: "المبلغ الإجمالي:",
+      en: "Total Amount:",
+    },
+    paymentMethod: {
+      ar: "طريقة الدفع",
+      en: "Payment Method",
+    },
+    creditCard: {
+      ar: "بطاقة ائتمان",
+      en: "Credit Card",
+    },
+    knet: {
+      ar: "كي نت",
+      en: "KNET",
+    },
+    cardNumber: {
+      ar: "رقم البطاقة",
+      en: "Card Number",
+    },
+    cardNumberTooltip: {
+      ar: "أدخل 16 رقم الموجود على بطاقتك",
+      en: "Enter the 16-digit number on your card",
+    },
+    expiryDate: {
+      ar: "تاريخ الانتهاء",
+      en: "Expiry Date",
+    },
+    securityCode: {
+      ar: "رمز التحقق",
+      en: "Security Code",
+    },
+    payNow: {
+      ar: "ادفع الآن",
+      en: "Pay Now",
+    },
+    processing: {
+      ar: "جاري المعالجة...",
+      en: "Processing...",
+    },
+    allTransactionsSecure: {
+      ar: "جميع المعاملات مشفرة وآمنة",
+      en: "All transactions are encrypted and secure",
+    },
+    paymentSuccessful: {
+      ar: "تم الدفع بنجاح",
+      en: "Payment Successful",
+    },
+    thankYou: {
+      ar: "شكراً لك، تمت عملية الدفع بنجاح",
+      en: "Thank you, your payment was successful",
+    },
+    paymentDate: {
+      ar: "تاريخ الدفع:",
+      en: "Payment Date:",
+    },
+    emailSent: {
+      ar: "تم إرسال تفاصيل الدفع إلى بريدك الإلكتروني",
+      en: "Payment details have been sent to your email",
+    },
+    returnToHome: {
+      ar: "العودة للرئيسية",
+      en: "Return to Home",
+    },
+    printReceipt: {
+      ar: "طباعة الإيصال",
+      en: "Print Receipt",
+    },
+    paymentVerification: {
+      ar: "التحقق من الدفع",
+      en: "Payment Verification",
+    },
+    enterVerificationCode: {
+      ar: "أدخل رمز التحقق المكون من 6 أرقام المرسل إلى هاتفك",
+      en: "Enter the 6-digit verification code sent to your phone",
+    },
+    codeSentTo: {
+      ar: "تم إرسال رمز التحقق إلى",
+      en: "Verification code sent to",
+    },
+    didntReceiveCode: {
+      ar: "لم تستلم الرمز؟",
+      en: "Didn't receive the code?",
+    },
+    resendCode: {
+      ar: "إعادة إرسال الرمز",
+      en: "Resend Code",
+    },
+    resendAfter: {
+      ar: "إعادة الإرسال بعد",
+      en: "Resend after",
+    },
+    seconds: {
+      ar: "ثانية",
+      en: "seconds",
+    },
+    confirm: {
+      ar: "تأكيد",
+      en: "Confirm",
+    },
+    verifying: {
+      ar: "جاري التحقق...",
+      en: "Verifying...",
+    },
+  }
+
+  // Helper function to get translation
+  const t = (key: keyof typeof translations) => {
+    return isArabic ? translations[key].ar : translations[key].en
   }
 
   // Progress indicator
@@ -262,38 +432,38 @@ export default function PaymentMethods() {
       <div className="flex flex-col items-center">
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            paymentState === "FORM" ? "bg-emerald-600 text-white" : "bg-emerald-600 text-white"
+            paymentState === "FORM" ? "bg-primary text-primary-foreground" : "bg-primary text-primary-foreground"
           }`}
         >
           1
         </div>
-        <span className="text-xs mt-1">الدفع</span>
+        <span className="text-xs mt-1">{t("payment")}</span>
       </div>
-      <div className={`h-0.5 flex-1 mx-2 ${paymentState !== "FORM" ? "bg-emerald-600" : "bg-muted"}`}></div>
+      <div className={`h-0.5 flex-1 mx-2 ${paymentState !== "FORM" ? "bg-primary" : "bg-muted"}`}></div>
       <div className="flex flex-col items-center">
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center ${
             paymentState === "OTP"
-              ? "bg-emerald-600 text-white"
+              ? "bg-primary text-primary-foreground"
               : paymentState === "SUCCESS"
-                ? "bg-emerald-600 text-white"
+                ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground"
           }`}
         >
           2
         </div>
-        <span className="text-xs mt-1">التحقق</span>
+        <span className="text-xs mt-1">{t("verification")}</span>
       </div>
-      <div className={`h-0.5 flex-1 mx-2 ${paymentState === "SUCCESS" ? "bg-emerald-600" : "bg-muted"}`}></div>
+      <div className={`h-0.5 flex-1 mx-2 ${paymentState === "SUCCESS" ? "bg-primary" : "bg-muted"}`}></div>
       <div className="flex flex-col items-center">
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            paymentState === "SUCCESS" ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground"
+            paymentState === "SUCCESS" ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
           }`}
         >
           3
         </div>
-        <span className="text-xs mt-1">التأكيد</span>
+        <span className="text-xs mt-1">{t("confirmation")}</span>
       </div>
     </div>
   )
@@ -302,53 +472,53 @@ export default function PaymentMethods() {
   const renderSuccessState = () => (
     <>
       <CardHeader className="space-y-1 pb-2">
-        <CardTitle className="text-2xl font-bold text-center">تم الدفع بنجاح</CardTitle>
-        <CardDescription className="text-center">شكراً لك، تمت عملية الدفع بنجاح</CardDescription>
+        <CardTitle className="text-2xl font-bold text-center">{t("paymentSuccessful")}</CardTitle>
+        <CardDescription className="text-center">{t("thankYou")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {renderProgressIndicator()}
 
         <div className="flex justify-center my-6">
-          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
-            <Check className="h-8 w-8 text-emerald-600" />
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+            <Check className="h-8 w-8 text-green-600" />
           </div>
         </div>
 
-        <div className="bg-slate-50 rounded-lg p-4 mb-4 border border-slate-100 shadow-sm">
+        <div className="bg-muted/30 rounded-lg p-4 mb-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-muted-foreground">رقم الطلب:</span>
+            <span className="text-sm text-muted-foreground">{t("orderNumber")}</span>
             <span className="font-medium">{orderDetails.id}</span>
           </div>
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-muted-foreground">تاريخ الدفع:</span>
+            <span className="text-sm text-muted-foreground">{t("paymentDate")}</span>
             <span className="font-medium">{getCurrentDate()}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">المبلغ الإجمالي:</span>
-            <span className="font-bold text-emerald-700">
-              {orderDetails.total} {currency === "sar" ? "د.ك" : "$"}
+            <span className="text-sm text-muted-foreground">{t("totalAmount")}</span>
+            <span className="font-bold">
+              {orderDetails.total} {currency === "sar" ? (isArabic ? "د.ك" : "KWD") : "$"}
             </span>
           </div>
         </div>
 
         <div className="text-center text-sm text-muted-foreground">
-          <p>تم إرسال تفاصيل الدفع إلى بريدك الإلكتروني</p>
+          <p>{t("emailSent")}</p>
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-4">
         <Button
-          className="w-full h-12 text-base font-medium shadow-md hover:shadow-lg transition-all bg-emerald-600 hover:bg-emerald-700"
+          className="w-full h-12 text-base font-medium shadow-md hover:shadow-lg transition-all"
           onClick={() => router.push("/")}
         >
           <span className="flex items-center gap-2">
-            العودة للرئيسية
+            {t("returnToHome")}
             <ChevronRight className="h-5 w-5" />
           </span>
         </Button>
-        <Button variant="outline" className="w-full border-slate-200 hover:bg-slate-50" onClick={() => window.print()}>
+        <Button variant="outline" className="w-full" onClick={() => window.print()}>
           <span className="flex items-center gap-2">
             <Download className="h-4 w-4" />
-            طباعة الإيصال
+            {t("printReceipt")}
           </span>
         </Button>
       </CardFooter>
@@ -357,63 +527,73 @@ export default function PaymentMethods() {
 
   return (
     <div
-      className="flex justify-center items-center min-h-screen bg-gradient-to-b from-slate-50 to-slate-100"
-      dir="rtl"
+      className="flex justify-center items-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100"
+      dir={isArabic ? "rtl" : "ltr"}
     >
-      <Card className="w-full max-w-md shadow-xl border-0 overflow-hidden rounded-xl">
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600"></div>
+      {/* Language Toggle Button */}
+      <div className="absolute top-4 right-4 z-10">
+        <button
+          onClick={toggleLanguage}
+          className="bg-white/80 backdrop-blur-sm rounded-full p-2 hover:bg-white/90 transition-colors shadow-sm"
+        >
+          <LanguagesIcon className="text-primary" size={20} />
+        </button>
+      </div>
+
+      <Card className="w-full max-w-md shadow-xl border-0 overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-primary-foreground"></div>
 
         {paymentState === "FORM" && (
           <>
-            <CardHeader className="space-y-1 pb-2 border-b border-slate-100">
+            <CardHeader className="space-y-1 pb-2">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-2xl font-bold">إتمام الدفع</CardTitle>
+                <CardTitle className="text-2xl font-bold">{t("completePayment")}</CardTitle>
                 <Badge
                   variant="outline"
-                  className="flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 border-emerald-200"
+                  className="flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 border-green-200"
                 >
-                  <Shield className="h-3 w-3" /> آمن
+                  <Shield className="h-3 w-3" /> {t("secure")}
                 </Badge>
               </div>
-              <CardDescription>اختر طريقة الدفع المفضلة لديك أدناه</CardDescription>
+              <CardDescription>{t("choosePaymentMethod")}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6 pt-6">
+            <CardContent className="space-y-6">
               {renderProgressIndicator()}
 
-              <div className="bg-slate-50 rounded-lg p-4 mb-6 border border-slate-100 shadow-sm">
+              <div className="bg-muted/30 rounded-lg p-4 mb-6">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-muted-foreground">رقم الطلب:</span>
+                  <span className="text-sm text-muted-foreground">{t("orderNumber")}</span>
                   <span className="font-medium">{orderDetails.id}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">المبلغ الإجمالي:</span>
-                  <span className="font-bold text-emerald-700">
-                    {orderDetails.total} {currency === "sar" ? "د.ك" : "$"}
+                  <span className="text-sm text-muted-foreground">{t("totalAmount")}</span>
+                  <span className="font-bold">
+                    {orderDetails.total} {currency === "sar" ? (isArabic ? "د.ك" : "KWD") : "$"}
                   </span>
                 </div>
               </div>
 
               <div>
-                <h3 className="font-medium mb-3">طريقة الدفع</h3>
+                <h3 className="font-medium mb-3">{t("paymentMethod")}</h3>
                 <RadioGroup value={paymentMethod || ""} onValueChange={setPaymentMethod} className="grid gap-4">
                   <div className="grid gap-6">
                     <div className="relative">
                       <div
                         className={`absolute inset-0 rounded-lg transition-all duration-200 ${
-                          paymentMethod === "card" ? "ring-2 ring-emerald-500" : ""
+                          paymentMethod === "card" ? "ring-2 ring-primary" : ""
                         }`}
                       ></div>
                       <div className="flex items-center space-x-2 relative">
-                        <RadioGroupItem value="card" id="card" className="text-emerald-600" />
+                        <RadioGroupItem value="card" id="card" />
                         <Label
                           htmlFor="card"
-                          className="flex items-center gap-2 cursor-pointer rounded-lg border border-slate-200 p-4 hover:bg-slate-50 transition-colors w-full"
+                          className="flex items-center gap-2 cursor-pointer rounded-lg border border-muted p-4 hover:bg-muted/30 transition-colors w-full"
                         >
-                          <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-2 rounded-md">
+                          <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-2 rounded-md">
                             <CreditCard className="h-5 w-5" />
                           </div>
-                          <div className="font-medium">بطاقة ائتمان</div>
-                          <div className="flex gap-1 mr-auto">
+                          <div className="font-medium">{t("creditCard")}</div>
+                          <div className={`flex gap-1 ${isArabic ? "mr-auto" : "ml-auto"}`}>
                             <div className="rounded">
                               <Image src="/visa.svg" alt="visa" width={30} height={30} />
                             </div>
@@ -429,18 +609,21 @@ export default function PaymentMethods() {
                     </div>
 
                     {paymentMethod === "card" && (
-                      <div className="grid gap-4 pr-6 animate-in fade-in-50 duration-300" dir="rtl">
+                      <div
+                        className={`grid gap-4 ${isArabic ? "pr-6" : "pl-6"} animate-in fade-in-50 duration-300`}
+                        dir={isArabic ? "rtl" : "ltr"}
+                      >
                         <div className="grid gap-2">
                           <div className="flex items-center justify-between">
                             <Label htmlFor="card-number" className="flex items-center gap-1">
-                              رقم البطاقة
+                              {t("cardNumber")}
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Info className="h-3 w-3 text-muted-foreground" />
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>أدخل 16 رقم الموجود على بطاقتك</p>
+                                    <p>{t("cardNumberTooltip")}</p>
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
@@ -458,17 +641,17 @@ export default function PaymentMethods() {
                               value={cardNumber}
                               onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
                               maxLength={19}
-                              className={`bg-white ${formErrors.cardNumber ? "border-destructive pr-10" : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"}`}
+                              className={formErrors.cardNumber ? "border-destructive pr-10" : ""}
                             />
                             <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                              <div className="w-6 h-4 bg-emerald-600 rounded"></div>
+                              <div className="w-6 h-4 bg-blue-600 rounded"></div>
                             </div>
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="grid gap-2">
                             <div className="flex items-center justify-between">
-                              <Label htmlFor="expiry">تاريخ الانتهاء</Label>
+                              <Label htmlFor="expiry">{t("expiryDate")}</Label>
                               {formErrors.cardExpiry && (
                                 <span className="text-xs text-destructive flex items-center gap-1">
                                   <AlertCircle className="h-3 w-3" /> {formErrors.cardExpiry}
@@ -482,12 +665,12 @@ export default function PaymentMethods() {
                               value={cardExpiry}
                               onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
                               maxLength={5}
-                              className={`bg-white ${formErrors.cardExpiry ? "border-destructive" : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"}`}
+                              className={formErrors.cardExpiry ? "border-destructive" : ""}
                             />
                           </div>
                           <div className="grid gap-2">
                             <div className="flex items-center justify-between">
-                              <Label htmlFor="cvc">رمز التحقق</Label>
+                              <Label htmlFor="cvc">{t("securityCode")}</Label>
                               {formErrors.cardCvc && (
                                 <span className="text-xs text-destructive flex items-center gap-1">
                                   <AlertCircle className="h-3 w-3" /> {formErrors.cardCvc}
@@ -501,7 +684,7 @@ export default function PaymentMethods() {
                               maxLength={4}
                               value={cardCvc}
                               onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, ""))}
-                              className={`bg-white ${formErrors.cardCvc ? "border-destructive" : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"}`}
+                              className={formErrors.cardCvc ? "border-destructive" : ""}
                             />
                           </div>
                         </div>
@@ -511,21 +694,21 @@ export default function PaymentMethods() {
                     <div className="relative">
                       <div
                         className={`absolute inset-0 rounded-lg transition-all duration-200 ${
-                          paymentMethod === "paypal" ? "ring-2 ring-emerald-500" : ""
+                          paymentMethod === "paypal" ? "ring-2 ring-primary" : ""
                         }`}
                       ></div>
                       <div className="flex items-center space-x-2 relative">
-                        <RadioGroupItem value="paypal" id="paypal" className="text-emerald-600" />
+                        <RadioGroupItem value="paypal" id="paypal" />
                         <Label
                           htmlFor="paypal"
-                          className="flex items-center gap-2 cursor-pointer rounded-lg border border-slate-200 p-4 hover:bg-slate-50 transition-colors w-full"
+                          className="flex items-center gap-2 cursor-pointer rounded-lg border border-muted p-4 hover:bg-muted/30 transition-colors w-full"
                         >
-                          <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white p-2 rounded-md">
+                          <div className="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-2 rounded-md">
                             <Wallet className="h-5 w-5" />
                           </div>
-                          <div className="font-medium">كي نت</div>
-                          <div className="flex gap-1 mr-auto">
-                            <div className="w-8 h-5 bg-emerald-700 rounded">
+                          <div className="font-medium">{t("knet")}</div>
+                          <div className={`flex gap-1 ${isArabic ? "mr-auto" : "ml-auto"}`}>
+                            <div className="w-8 h-5 bg-blue-800 rounded">
                               <Image src="/kv.png" alt="KNET" width={32} height={20} />
                             </div>
                           </div>
@@ -536,16 +719,16 @@ export default function PaymentMethods() {
                 </RadioGroup>
               </div>
             </CardContent>
-            <CardFooter className="flex flex-col gap-4 border-t border-slate-100 pt-6">
+            <CardFooter className="flex flex-col gap-4">
               <Button
-                className="w-full h-12 text-base font-medium shadow-md hover:shadow-lg transition-all bg-emerald-600 hover:bg-emerald-700"
+                className="w-full h-12 text-base font-medium shadow-md hover:shadow-lg transition-all"
                 disabled={!paymentMethod || isProcessing}
                 onClick={handlePayment}
               >
                 {isProcessing ? (
                   <span className="flex items-center gap-2">
                     <svg
-                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      className={`animate-spin ${isArabic ? "-ml-1 mr-2" : "-mr-1 ml-2"} h-4 w-4 text-white`}
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -564,18 +747,18 @@ export default function PaymentMethods() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    جاري المعالجة...
+                    {t("processing")}
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    ادفع الآن
+                    {t("payNow")}
                     <ChevronRight className="h-5 w-5" />
                   </span>
                 )}
               </Button>
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <Shield className="h-3 w-3" />
-                <span>جميع المعاملات مشفرة وآمنة</span>
+                <span>{t("allTransactionsSecure")}</span>
               </div>
             </CardFooter>
           </>
@@ -585,27 +768,27 @@ export default function PaymentMethods() {
 
         {/* OTP Dialog */}
         <Dialog open={showOtpDialog} onOpenChange={setShowOtpDialog}>
-          <DialogContent className="sm:max-w-md rounded-xl" dir="rtl">
+          <DialogContent className="sm:max-w-md" dir={isArabic ? "rtl" : "ltr"}>
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold">التحقق من الدفع</DialogTitle>
-              <DialogDescription>أدخل رمز التحقق المكون من 6 أرقام المرسل إلى هاتفك</DialogDescription>
+              <DialogTitle className="text-xl font-bold">{t("paymentVerification")}</DialogTitle>
+              <DialogDescription>{t("enterVerificationCode")}</DialogDescription>
             </DialogHeader>
 
-            <div className="bg-slate-50 rounded-lg p-4 mb-4 border border-slate-100 shadow-sm">
+            <div className="bg-muted/30 rounded-lg p-4 mb-4">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-muted-foreground">رقم الطلب:</span>
+                <span className="text-sm text-muted-foreground">{t("orderNumber")}</span>
                 <span className="font-medium">{orderDetails.id}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">المبلغ الإجمالي:</span>
-                <span className="font-bold text-emerald-700">
-                  {orderDetails.total} {currency === "sar" ? "د.ك" : "$"}
+                <span className="text-sm text-muted-foreground">{t("totalAmount")}</span>
+                <span className="font-bold">
+                  {orderDetails.total} {currency === "sar" ? (isArabic ? "د.ك" : "KWD") : "$"}
                 </span>
               </div>
             </div>
 
             <div className="text-center mb-2">
-              <p className="text-sm mb-1">تم إرسال رمز التحقق إلى</p>
+              <p className="text-sm mb-1">{t("codeSentTo")}</p>
               <p className="font-medium">+965 5XX XXX XX89</p>
             </div>
 
@@ -620,7 +803,7 @@ export default function PaymentMethods() {
                     value={value}
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className={`w-12 h-14 text-center text-lg font-bold bg-white ${otpError ? "border-destructive" : "border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"}`}
+                    className={`w-12 h-14 text-center text-lg font-bold ${otpError ? "border-destructive" : ""}`}
                   />
                   {index < 5 && <div className="absolute left-[-8px] top-1/2 w-4 h-[1px] bg-muted-foreground/30"></div>}
                 </div>
@@ -635,32 +818,27 @@ export default function PaymentMethods() {
             )}
 
             <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-2">لم تستلم الرمز؟</p>
-              <Button
-                variant="link"
-                onClick={resendOtp}
-                disabled={resendDisabled}
-                className="text-sm p-0 h-auto text-emerald-600 hover:text-emerald-700"
-              >
-                {resendDisabled ? `إعادة الإرسال بعد ${countdown} ثانية` : "إعادة إرسال الرمز"}
+              <p className="text-sm text-muted-foreground mb-2">{t("didntReceiveCode")}</p>
+              <Button variant="link" onClick={resendOtp} disabled={resendDisabled} className="text-sm p-0 h-auto">
+                {resendDisabled ? `${t("resendAfter")} ${countdown} ${t("seconds")}` : t("resendCode")}
               </Button>
             </div>
 
             <DialogFooter className="sm:justify-center">
               <Button
-                className="w-full h-12 text-base font-medium shadow-md hover:shadow-lg transition-all bg-emerald-600 hover:bg-emerald-700"
+                className="w-full h-12 text-base font-medium shadow-md hover:shadow-lg transition-all"
                 disabled={otpValues.some((v) => !v) || isProcessing}
                 onClick={verifyOtp}
               >
                 {isProcessing ? (
                   <span className="flex items-center gap-2">
-                    <Loader className="mr-2" />
-                    جاري التحقق...
+                    <Loader className={isArabic ? "mr-2" : "ml-2"} />
+                    {t("verifying")}
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
-                    <Lock className="h-4 w-4 mr-1" />
-                    تأكيد
+                    <Lock className={`h-4 w-4 ${isArabic ? "mr-1" : "ml-1"}`} />
+                    {t("confirm")}
                   </span>
                 )}
               </Button>
